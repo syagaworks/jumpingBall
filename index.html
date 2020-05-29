@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="UTF-8">
+    <title>aga works</title>
+    <script src="https://www.gstatic.com/firebasejs/5.0.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.0.1/firebase-database.js"></script>
+    <script type="text/javascript" src="elm.js"></script>
+    <link rel="shortcut icon" type="image/x-icon" href="https://syagaworks.github.io/git_test3/favicon.ico">
     <style>
       body,
       div:first-child {
@@ -12,10 +19,37 @@
   <body>
     <main></main>
     <script src="https://unpkg.com/elm-canvas@2.2/elm-canvas.js"></script>
-    <script src="./elm.js"></script>
     <script>
+      var firebaseConfig = {
+        apiKey: "AIzaSyCM6RROwwJLtPez6EZMlouMu7rG56Y7KJ8",
+        authDomain: "jumpingball-716d8.firebaseapp.com",
+        databaseURL: "https://jumpingball-716d8.firebaseio.com",
+        projectId: "jumpingball-716d8",
+        storageBucket: "jumpingball-716d8.appspot.com",
+        messagingSenderId: "258804517799",
+        appId: "1:258804517799:web:9e519130cf769a06f10482"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+
       var app = Elm.Main.init({ node: document.querySelector("main") });
-      // you can use ports and stuff here
+
+      // window.onload = function() {
+      //   var rankingRef = firebase.database().ref().child("ranking");
+      //
+      //   rankingRef.orderByChild("score").limitToFirst(10).on('value', function(snapshot) {
+      //     if (snapshot.val() !== null) {
+      //       var ranking = Object.keys(snapshot.val());
+      //
+      //       //app.ports.rankingReceiver.send(publicRooms);
+      //     }
+      //   });
+      // }
+      //
+      // app.ports.scoreSender.subscribe(function(data){
+      //   console.log(data);
+      // });
+
     </script>
   </body>
 </html>

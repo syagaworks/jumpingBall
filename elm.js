@@ -4310,6 +4310,89 @@ function _Browser_load(url)
 		}
 	}));
 }
+
+
+
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
+
+
+
+function _Time_now(millisToPosix)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(millisToPosix(Date.now())));
+	});
+}
+
+var _Time_setInterval = F2(function(interval, task)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var id = setInterval(function() { _Scheduler_rawSpawn(task); }, interval);
+		return function() { clearInterval(id); };
+	});
+});
+
+function _Time_here()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(
+			A2($elm$time$Time$customZone, -(new Date().getTimezoneOffset()), _List_Nil)
+		));
+	});
+}
+
+
+function _Time_getZoneName()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		try
+		{
+			var name = $elm$time$Time$Name(Intl.DateTimeFormat().resolvedOptions().timeZone);
+		}
+		catch (e)
+		{
+			var name = $elm$time$Time$Offset(new Date().getTimezoneOffset());
+		}
+		callback(_Scheduler_succeed(name));
+	});
+}
 var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
@@ -5099,81 +5182,279 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Main$Game = {$: 'Game'};
+var $author$project$Main$AppendScaffolds = function (a) {
+	return {$: 'AppendScaffolds', a: a};
+};
+var $elm$random$Random$Generate = function (a) {
+	return {$: 'Generate', a: a};
+};
+var $elm$random$Random$Seed = F2(
+	function (a, b) {
+		return {$: 'Seed', a: a, b: b};
+	});
+var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var $elm$random$Random$next = function (_v0) {
+	var state0 = _v0.a;
+	var incr = _v0.b;
+	return A2($elm$random$Random$Seed, ((state0 * 1664525) + incr) >>> 0, incr);
+};
+var $elm$random$Random$initialSeed = function (x) {
+	var _v0 = $elm$random$Random$next(
+		A2($elm$random$Random$Seed, 0, 1013904223));
+	var state1 = _v0.a;
+	var incr = _v0.b;
+	var state2 = (state1 + x) >>> 0;
+	return $elm$random$Random$next(
+		A2($elm$random$Random$Seed, state2, incr));
+};
+var $elm$time$Time$Name = function (a) {
+	return {$: 'Name', a: a};
+};
+var $elm$time$Time$Offset = function (a) {
+	return {$: 'Offset', a: a};
+};
+var $elm$time$Time$Zone = F2(
+	function (a, b) {
+		return {$: 'Zone', a: a, b: b};
+	});
+var $elm$time$Time$customZone = $elm$time$Time$Zone;
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
+var $elm$time$Time$now = _Time_now($elm$time$Time$millisToPosix);
+var $elm$time$Time$posixToMillis = function (_v0) {
+	var millis = _v0.a;
+	return millis;
+};
+var $elm$random$Random$init = A2(
+	$elm$core$Task$andThen,
+	function (time) {
+		return $elm$core$Task$succeed(
+			$elm$random$Random$initialSeed(
+				$elm$time$Time$posixToMillis(time)));
+	},
+	$elm$time$Time$now);
+var $elm$random$Random$step = F2(
+	function (_v0, seed) {
+		var generator = _v0.a;
+		return generator(seed);
+	});
+var $elm$random$Random$onEffects = F3(
+	function (router, commands, seed) {
+		if (!commands.b) {
+			return $elm$core$Task$succeed(seed);
+		} else {
+			var generator = commands.a.a;
+			var rest = commands.b;
+			var _v1 = A2($elm$random$Random$step, generator, seed);
+			var value = _v1.a;
+			var newSeed = _v1.b;
+			return A2(
+				$elm$core$Task$andThen,
+				function (_v2) {
+					return A3($elm$random$Random$onEffects, router, rest, newSeed);
+				},
+				A2($elm$core$Platform$sendToApp, router, value));
+		}
+	});
+var $elm$random$Random$onSelfMsg = F3(
+	function (_v0, _v1, seed) {
+		return $elm$core$Task$succeed(seed);
+	});
+var $elm$random$Random$Generator = function (a) {
+	return {$: 'Generator', a: a};
+};
+var $elm$random$Random$map = F2(
+	function (func, _v0) {
+		var genA = _v0.a;
+		return $elm$random$Random$Generator(
+			function (seed0) {
+				var _v1 = genA(seed0);
+				var a = _v1.a;
+				var seed1 = _v1.b;
+				return _Utils_Tuple2(
+					func(a),
+					seed1);
+			});
+	});
+var $elm$random$Random$cmdMap = F2(
+	function (func, _v0) {
+		var generator = _v0.a;
+		return $elm$random$Random$Generate(
+			A2($elm$random$Random$map, func, generator));
+	});
+_Platform_effectManagers['Random'] = _Platform_createManager($elm$random$Random$init, $elm$random$Random$onEffects, $elm$random$Random$onSelfMsg, $elm$random$Random$cmdMap);
+var $elm$random$Random$command = _Platform_leaf('Random');
+var $elm$random$Random$generate = F2(
+	function (tagger, generator) {
+		return $elm$random$Random$command(
+			$elm$random$Random$Generate(
+				A2($elm$random$Random$map, tagger, generator)));
+	});
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $elm$core$Basics$abs = function (n) {
+	return (n < 0) ? (-n) : n;
+};
+var $elm$core$Bitwise$and = _Bitwise_and;
+var $elm$core$Bitwise$xor = _Bitwise_xor;
+var $elm$random$Random$peel = function (_v0) {
+	var state = _v0.a;
+	var word = (state ^ (state >>> ((state >>> 28) + 4))) * 277803737;
+	return ((word >>> 22) ^ word) >>> 0;
+};
+var $elm$random$Random$float = F2(
+	function (a, b) {
+		return $elm$random$Random$Generator(
+			function (seed0) {
+				var seed1 = $elm$random$Random$next(seed0);
+				var range = $elm$core$Basics$abs(b - a);
+				var n1 = $elm$random$Random$peel(seed1);
+				var n0 = $elm$random$Random$peel(seed0);
+				var lo = (134217727 & n1) * 1.0;
+				var hi = (67108863 & n0) * 1.0;
+				var val = ((hi * 134217728.0) + lo) / 9007199254740992.0;
+				var scaled = (val * range) + a;
+				return _Utils_Tuple2(
+					scaled,
+					$elm$random$Random$next(seed1));
+			});
+	});
+var $elm$random$Random$listHelp = F4(
+	function (revList, n, gen, seed) {
+		listHelp:
+		while (true) {
+			if (n < 1) {
+				return _Utils_Tuple2(revList, seed);
+			} else {
+				var _v0 = gen(seed);
+				var value = _v0.a;
+				var newSeed = _v0.b;
+				var $temp$revList = A2($elm$core$List$cons, value, revList),
+					$temp$n = n - 1,
+					$temp$gen = gen,
+					$temp$seed = newSeed;
+				revList = $temp$revList;
+				n = $temp$n;
+				gen = $temp$gen;
+				seed = $temp$seed;
+				continue listHelp;
+			}
+		}
+	});
+var $elm$random$Random$list = F2(
+	function (n, _v0) {
+		var gen = _v0.a;
+		return $elm$random$Random$Generator(
+			function (seed) {
+				return A4($elm$random$Random$listHelp, _List_Nil, n, gen, seed);
+			});
+	});
+var $elm$random$Random$map3 = F4(
+	function (func, _v0, _v1, _v2) {
+		var genA = _v0.a;
+		var genB = _v1.a;
+		var genC = _v2.a;
+		return $elm$random$Random$Generator(
+			function (seed0) {
+				var _v3 = genA(seed0);
+				var a = _v3.a;
+				var seed1 = _v3.b;
+				var _v4 = genB(seed1);
+				var b = _v4.a;
+				var seed2 = _v4.b;
+				var _v5 = genC(seed2);
+				var c = _v5.a;
+				var seed3 = _v5.b;
+				return _Utils_Tuple2(
+					A3(func, a, b, c),
+					seed3);
+			});
+	});
+var $author$project$Main$width = 400;
+var $author$project$Main$scaffoldGenerator = A2(
+	$elm$random$Random$list,
+	100,
+	A4(
+		$elm$random$Random$map3,
+		F3(
+			function (xPos, yPos, length) {
+				return {
+					leftTip: _Utils_Tuple2(xPos, yPos),
+					length: length
+				};
+			}),
+		A2($elm$random$Random$float, 0, $author$project$Main$width),
+		A2($elm$random$Random$float, 50, 100),
+		A2($elm$random$Random$float, 20, 100)));
+var $author$project$Main$generateScaffolds = A2($elm$random$Random$generate, $author$project$Main$AppendScaffolds, $author$project$Main$scaffoldGenerator);
 var $author$project$Main$Scaffold = F2(
 	function (leftTip, length) {
 		return {leftTip: leftTip, length: length};
 	});
+var $author$project$Main$Top = {$: 'Top'};
 var $author$project$Main$height = 640;
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
-var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$radius = 20;
-var $author$project$Main$width = 400;
+var $author$project$Main$initialModel = {
+	ballX: $author$project$Main$width / 2,
+	ballY: $author$project$Main$height - $author$project$Main$radius,
+	isOver: false,
+	lapsedTime: -50,
+	leftPressed: false,
+	lowerBase: $author$project$Main$height,
+	offSet: -30,
+	phase: $author$project$Main$Top,
+	rightPressed: false,
+	scaffolds: _List_fromArray(
+		[
+			A2(
+			$author$project$Main$Scaffold,
+			_Utils_Tuple2(0, $author$project$Main$height),
+			$author$project$Main$width),
+			A2(
+			$author$project$Main$Scaffold,
+			_Utils_Tuple2(100, 540),
+			50),
+			A2(
+			$author$project$Main$Scaffold,
+			_Utils_Tuple2(150, 500),
+			50),
+			A2(
+			$author$project$Main$Scaffold,
+			_Utils_Tuple2(200, 440),
+			50),
+			A2(
+			$author$project$Main$Scaffold,
+			_Utils_Tuple2(120, 380),
+			50),
+			A2(
+			$author$project$Main$Scaffold,
+			_Utils_Tuple2(80, 340),
+			50),
+			A2(
+			$author$project$Main$Scaffold,
+			_Utils_Tuple2(50, 280),
+			50),
+			A2(
+			$author$project$Main$Scaffold,
+			_Utils_Tuple2(120, 200),
+			50),
+			A2(
+			$author$project$Main$Scaffold,
+			_Utils_Tuple2(180, 150),
+			50),
+			A2(
+			$author$project$Main$Scaffold,
+			_Utils_Tuple2(80, 100),
+			50)
+		]),
+	score: $author$project$Main$height,
+	userName: ''
+};
 var $author$project$Main$init = function (_v0) {
-	return _Utils_Tuple2(
-		{
-			ballX: $author$project$Main$width / 2,
-			ballY: $author$project$Main$height - $author$project$Main$radius,
-			deltaOffSet: 0,
-			lapsedTime: -50,
-			leftPressed: false,
-			lowerBase: $author$project$Main$height,
-			offSet: -30,
-			phase: $author$project$Main$Game,
-			rightPressed: false,
-			scaffolds: _List_fromArray(
-				[
-					A2(
-					$author$project$Main$Scaffold,
-					_Utils_Tuple2(10, 50),
-					50),
-					A2(
-					$author$project$Main$Scaffold,
-					_Utils_Tuple2(80, 100),
-					50),
-					A2(
-					$author$project$Main$Scaffold,
-					_Utils_Tuple2(100, 540),
-					50),
-					A2(
-					$author$project$Main$Scaffold,
-					_Utils_Tuple2(150, 500),
-					50),
-					A2(
-					$author$project$Main$Scaffold,
-					_Utils_Tuple2(200, 440),
-					50),
-					A2(
-					$author$project$Main$Scaffold,
-					_Utils_Tuple2(120, 380),
-					50),
-					A2(
-					$author$project$Main$Scaffold,
-					_Utils_Tuple2(80, 340),
-					50),
-					A2(
-					$author$project$Main$Scaffold,
-					_Utils_Tuple2(50, 280),
-					50),
-					A2(
-					$author$project$Main$Scaffold,
-					_Utils_Tuple2(120, 200),
-					50),
-					A2(
-					$author$project$Main$Scaffold,
-					_Utils_Tuple2(180, 150),
-					50),
-					A2(
-					$author$project$Main$Scaffold,
-					_Utils_Tuple2(0, $author$project$Main$height),
-					$author$project$Main$width)
-				]),
-			score: $author$project$Main$height
-		},
-		$elm$core$Platform$Cmd$none);
+	return _Utils_Tuple2($author$project$Main$initialModel, $author$project$Main$generateScaffolds);
 };
 var $author$project$Main$Frame = function (a) {
 	return {$: 'Frame', a: a};
@@ -5190,12 +5471,15 @@ var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$Main$Left = {$: 'Left'};
 var $author$project$Main$Other = {$: 'Other'};
 var $author$project$Main$Right = {$: 'Right'};
+var $author$project$Main$Up = {$: 'Up'};
 var $author$project$Main$toDirection = function (string) {
 	switch (string) {
 		case 'ArrowLeft':
 			return $author$project$Main$Left;
 		case 'ArrowRight':
 			return $author$project$Main$Right;
+		case 'ArrowUp':
+			return $author$project$Main$Up;
 		default:
 			return $author$project$Main$Other;
 	}
@@ -5265,10 +5549,6 @@ var $elm$browser$Browser$AnimationManager$onEffects = F3(
 			}
 		}
 	});
-var $elm$time$Time$Posix = function (a) {
-	return {$: 'Posix', a: a};
-};
-var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
 var $elm$browser$Browser$AnimationManager$onSelfMsg = F3(
 	function (router, newTime, _v0) {
 		var subs = _v0.subs;
@@ -5752,6 +6032,8 @@ var $author$project$Main$subscriptions = function (model) {
 var $author$project$Main$Collided = function (a) {
 	return {$: 'Collided', a: a};
 };
+var $author$project$Main$Game = {$: 'Game'};
+var $author$project$Main$HowToPlay = {$: 'HowToPlay'};
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -5771,8 +6053,31 @@ var $elm$core$List$isEmpty = function (xs) {
 		return false;
 	}
 };
-var $elm$core$Debug$log = _Debug_log;
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $elm$core$Basics$not = _Basics_not;
+var $elm_community$list_extra$List$Extra$scanl = F3(
+	function (f, b, xs) {
+		var scan1 = F2(
+			function (x, accAcc) {
+				if (accAcc.b) {
+					var acc = accAcc.a;
+					return A2(
+						$elm$core$List$cons,
+						A2(f, x, acc),
+						accAcc);
+				} else {
+					return _List_Nil;
+				}
+			});
+		return $elm$core$List$reverse(
+			A3(
+				$elm$core$List$foldl,
+				scan1,
+				_List_fromArray(
+					[b]),
+				xs));
+	});
 var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
 	return y;
@@ -5783,18 +6088,36 @@ var $author$project$Main$update = F2(
 		while (true) {
 			switch (msg.$) {
 				case 'Frame':
+					var underFrame = _Utils_cmp(model.ballY, ($author$project$Main$height - model.offSet) + 150) > 0;
 					var newModel = _Utils_update(
 						model,
 						{
-							ballX: _Utils_eq(model.leftPressed, model.rightPressed) ? model.ballX : (model.leftPressed ? (model.ballX - 2) : (model.ballX + 2)),
-							ballY: model.ballY + (0.1 * model.lapsedTime),
-							deltaOffSet: (model.deltaOffSet > 0) ? (model.deltaOffSet - 1) : 0,
+							ballX: function () {
+								var afterMove = _Utils_eq(model.leftPressed, model.rightPressed) ? model.ballX : (model.leftPressed ? (model.ballX - 4) : (model.ballX + 4));
+								var afterLoop = (_Utils_cmp(afterMove, $author$project$Main$width) > 0) ? (afterMove - $author$project$Main$width) : ((afterMove < 0) ? (afterMove + $author$project$Main$width) : afterMove);
+								return afterLoop;
+							}(),
+							ballY: underFrame ? model.ballY : (model.ballY + (0.1 * model.lapsedTime)),
+							isOver: underFrame,
 							lapsedTime: model.lapsedTime + 1,
-							offSet: (model.deltaOffSet > 0) ? (model.offSet + 1) : model.offSet,
+							offSet: (_Utils_cmp($author$project$Main$height - model.offSet, model.lowerBase + ($author$project$Main$height / 2)) > 0) ? (model.offSet + 1) : model.offSet,
+							scaffolds: function () {
+								var _v2 = model.scaffolds;
+								if (!_v2.b) {
+									return model.scaffolds;
+								} else {
+									var x = _v2.a;
+									var xs = _v2.b;
+									return (_Utils_cmp(x.leftTip.b, ($author$project$Main$height - model.offSet) + 150) > 0) ? xs : model.scaffolds;
+								}
+							}(),
 							score: (_Utils_cmp(model.ballY, model.score) < 0) ? $elm$core$Basics$floor(model.ballY) : model.score
 						});
 					var isC = function (scaffold) {
-						return ((scaffold.leftTip.b - (model.ballY + $author$project$Main$radius)) > 0) && (((scaffold.leftTip.b - (model.ballY + $author$project$Main$radius)) < 10) && ((_Utils_cmp(scaffold.leftTip.a, model.ballX) < 1) && ((_Utils_cmp(scaffold.length + scaffold.leftTip.a, model.ballX) > -1) && (model.lapsedTime >= 0))));
+						var yPos = scaffold.leftTip.b;
+						var xPos = scaffold.leftTip.a;
+						var len = scaffold.length;
+						return ((yPos - (model.ballY + $author$project$Main$radius)) > 0) && (((yPos - (model.ballY + $author$project$Main$radius)) < 10) && (((_Utils_cmp(xPos + len, $author$project$Main$width) < 0) ? ((_Utils_cmp(xPos, model.ballX) < 1) && (_Utils_cmp(len + xPos, model.ballX) > -1)) : ((_Utils_cmp(xPos, model.ballX) < 1) || (_Utils_cmp((len + xPos) - $author$project$Main$width, model.ballX) > -1))) && (model.lapsedTime >= 0)));
 					};
 					var isColliding = A2($elm$core$List$filter, isC, model.scaffolds);
 					var getScaffoldY = function (scaffolds) {
@@ -5807,10 +6130,7 @@ var $author$project$Main$update = F2(
 					};
 					if (!$elm$core$List$isEmpty(isColliding)) {
 						var $temp$msg = $author$project$Main$Collided(
-							A2(
-								$elm$core$Debug$log,
-								'hoge',
-								getScaffoldY(isColliding))),
+							getScaffoldY(isColliding)),
 							$temp$model = newModel;
 						msg = $temp$msg;
 						model = $temp$model;
@@ -5820,64 +6140,230 @@ var $author$project$Main$update = F2(
 					}
 				case 'Collided':
 					var y = msg.a;
+					var isFirstCollision = (model.lowerBase - y) > 5;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
-								deltaOffSet: ((model.lowerBase - y) > 5) ? (model.lowerBase - y) : model.deltaOffSet,
 								lapsedTime: -50,
-								lowerBase: ((model.lowerBase - y) > 5) ? y : A2($elm$core$Debug$log, 'LB', model.lowerBase)
+								lowerBase: isFirstCollision ? y : model.lowerBase
 							}),
+						($elm$core$List$length(model.scaffolds) < 30) ? $author$project$Main$generateScaffolds : $elm$core$Platform$Cmd$none);
+				case 'NameInput':
+					var name = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{userName: name}),
+						$elm$core$Platform$Cmd$none);
+				case 'NameDecided':
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{phase: $author$project$Main$Top}),
 						$elm$core$Platform$Cmd$none);
 				case 'KeyDown':
 					switch (msg.a.$) {
 						case 'Left':
-							var _v2 = msg.a;
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{leftPressed: true}),
-								$elm$core$Platform$Cmd$none);
-						case 'Right':
 							var _v3 = msg.a;
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{rightPressed: true}),
-								$elm$core$Platform$Cmd$none);
+							var _v4 = model.phase;
+							switch (_v4.$) {
+								case 'Top':
+									return _Utils_Tuple2(
+										_Utils_update(
+											model,
+											{phase: $author$project$Main$Game}),
+										$elm$core$Platform$Cmd$none);
+								case 'Game':
+									return _Utils_Tuple2(
+										_Utils_update(
+											model,
+											{leftPressed: true}),
+										$elm$core$Platform$Cmd$none);
+								default:
+									return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+							}
+						case 'Right':
+							var _v5 = msg.a;
+							var _v6 = model.phase;
+							switch (_v6.$) {
+								case 'Top':
+									return _Utils_Tuple2(
+										_Utils_update(
+											model,
+											{phase: $author$project$Main$Game}),
+										$elm$core$Platform$Cmd$none);
+								case 'Game':
+									return model.isOver ? _Utils_Tuple2(
+										_Utils_update(
+											$author$project$Main$initialModel,
+											{phase: $author$project$Main$Game, userName: model.userName}),
+										$author$project$Main$generateScaffolds) : _Utils_Tuple2(
+										_Utils_update(
+											model,
+											{rightPressed: true}),
+										$elm$core$Platform$Cmd$none);
+								default:
+									return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+							}
+						case 'Up':
+							var _v7 = msg.a;
+							var _v8 = model.phase;
+							switch (_v8.$) {
+								case 'Top':
+									return _Utils_Tuple2(
+										_Utils_update(
+											model,
+											{phase: $author$project$Main$HowToPlay}),
+										$elm$core$Platform$Cmd$none);
+								case 'Name':
+									return _Utils_Tuple2(
+										_Utils_update(
+											model,
+											{phase: $author$project$Main$Top}),
+										$elm$core$Platform$Cmd$none);
+								default:
+									return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+							}
 						default:
-							var _v4 = msg.a;
+							var _v9 = msg.a;
 							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 					}
 				case 'KeyUp':
 					switch (msg.a.$) {
 						case 'Left':
-							var _v5 = msg.a;
+							var _v10 = msg.a;
 							return _Utils_Tuple2(
 								_Utils_update(
 									model,
-									{leftPressed: false}),
+									{isOver: false, leftPressed: false}),
 								$elm$core$Platform$Cmd$none);
 						case 'Right':
-							var _v6 = msg.a;
+							var _v11 = msg.a;
 							return _Utils_Tuple2(
 								_Utils_update(
 									model,
 									{rightPressed: false}),
 								$elm$core$Platform$Cmd$none);
+						case 'Up':
+							var _v12 = msg.a;
+							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						default:
-							var _v7 = msg.a;
+							var _v13 = msg.a;
 							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 					}
-				default:
+				case 'Test':
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{ballY: 100}),
 						$elm$core$Platform$Cmd$none);
+				case 'AppendScaffolds':
+					var scaffolds = msg.a;
+					var initialScaffold = function () {
+						var _v14 = $elm$core$List$reverse(model.scaffolds);
+						if (!_v14.b) {
+							return A2(
+								$author$project$Main$Scaffold,
+								_Utils_Tuple2(0, 0),
+								0);
+						} else {
+							var x = _v14.a;
+							return x;
+						}
+					}();
+					var foldY = F2(
+						function (s1, s2) {
+							return _Utils_update(
+								s1,
+								{
+									leftTip: _Utils_Tuple2(s1.leftTip.a, s2.leftTip.b - s1.leftTip.b)
+								});
+						});
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								scaffolds: _Utils_ap(
+									model.scaffolds,
+									A3($elm_community$list_extra$List$Extra$scanl, foldY, initialScaffold, scaffolds))
+							}),
+						$elm$core$Platform$Cmd$none);
+				default:
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			}
 		}
 	});
+var $author$project$Main$NameDecided = {$: 'NameDecided'};
+var $author$project$Main$NameInput = function (a) {
+	return {$: 'NameInput', a: a};
+};
+var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$json$Json$Decode$andThen = _Json_andThen;
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $elm$html$Html$Events$keyCode = A2($elm$json$Json$Decode$field, 'keyCode', $elm$json$Json$Decode$int);
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $author$project$Main$onEnter = function (msg) {
+	var isEnter = function (code) {
+		return (code === 13) ? $elm$json$Json$Decode$succeed(msg) : $elm$json$Json$Decode$fail('not ENTER');
+	};
+	return A2(
+		$elm$html$Html$Events$on,
+		'keydown',
+		A2($elm$json$Json$Decode$andThen, isEnter, $elm$html$Html$Events$keyCode));
+};
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
 var $author$project$Main$Test = {$: 'Test'};
 var $joakin$elm_canvas$Canvas$Internal$Canvas$Fill = function (a) {
 	return {$: 'Fill', a: a};
@@ -6044,192 +6530,45 @@ var $author$project$Main$clearScreen = A2(
 			$author$project$Main$width,
 			$author$project$Main$height)
 		]));
-var $elm$html$Html$div = _VirtualDom_node('div');
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
+var $author$project$Main$MouseDown = F2(
+	function (a, b) {
+		return {$: 'MouseDown', a: a, b: b};
 	});
+var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom = $elm$json$Json$Decode$map2($elm$core$Basics$apR);
+var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
+	function (key, valDecoder, decoder) {
+		return A2(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+			A2($elm$json$Json$Decode$field, key, valDecoder),
+			decoder);
+	});
+var $author$project$Main$mouseDownDecoder = A3(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'offsetY',
+	$elm$json$Json$Decode$int,
+	A3(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'offsetX',
+		$elm$json$Json$Decode$int,
+		$elm$json$Json$Decode$succeed($author$project$Main$MouseDown)));
+var $author$project$Main$MouseUp = F2(
+	function (a, b) {
+		return {$: 'MouseUp', a: a, b: b};
+	});
+var $author$project$Main$mouseUpDecoder = A3(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'offsetY',
+	$elm$json$Json$Decode$int,
+	A3(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'offsetX',
+		$elm$json$Json$Decode$int,
+		$elm$json$Json$Decode$succeed($author$project$Main$MouseUp)));
 var $elm$html$Html$Events$onClick = function (msg) {
 	return A2(
 		$elm$html$Html$Events$on,
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
-};
-var $joakin$elm_canvas$Canvas$Internal$Canvas$Circle = F2(
-	function (a, b) {
-		return {$: 'Circle', a: a, b: b};
-	});
-var $joakin$elm_canvas$Canvas$circle = F2(
-	function (pos, radius) {
-		return A2($joakin$elm_canvas$Canvas$Internal$Canvas$Circle, pos, radius);
-	});
-var $joakin$elm_canvas$Canvas$Internal$Canvas$SettingCommand = function (a) {
-	return {$: 'SettingCommand', a: a};
-};
-var $elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v0, obj) {
-					var k = _v0.a;
-					var v = _v0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
-var $elm$json$Json$Encode$string = _Json_wrap;
-var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$field = F2(
-	function (name, value) {
-		return $elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'type',
-					$elm$json$Json$Encode$string('field')),
-					_Utils_Tuple2(
-					'name',
-					$elm$json$Json$Encode$string(name)),
-					_Utils_Tuple2('value', value)
-				]));
-	});
-var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$font = function (f) {
-	return A2(
-		$joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$field,
-		'font',
-		$elm$json$Json$Encode$string(f));
-};
-var $joakin$elm_canvas$Canvas$Settings$Text$font = function (_v0) {
-	var size = _v0.size;
-	var family = _v0.family;
-	return $joakin$elm_canvas$Canvas$Internal$Canvas$SettingCommand(
-		$joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$font(
-			$elm$core$String$fromInt(size) + ('px ' + family)));
-};
-var $author$project$Main$renderScaffolds = function (model) {
-	var renderS = function (scaffold) {
-		return A2(
-			$joakin$elm_canvas$Canvas$shapes,
-			_List_Nil,
-			_List_fromArray(
-				[
-					A3(
-					$joakin$elm_canvas$Canvas$rect,
-					_Utils_Tuple2(scaffold.leftTip.a, model.offSet + scaffold.leftTip.b),
-					scaffold.length,
-					5)
-				]));
-	};
-	return A2($elm$core$List$map, renderS, model.scaffolds);
-};
-var $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableText = function (a) {
-	return {$: 'DrawableText', a: a};
-};
-var $joakin$elm_canvas$Canvas$text = F3(
-	function (settings, point, str) {
-		return A2(
-			$joakin$elm_canvas$Canvas$addSettingsToRenderable,
-			settings,
-			$joakin$elm_canvas$Canvas$Renderable(
-				{
-					commands: _List_Nil,
-					drawOp: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
-					drawable: $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableText(
-						{maxWidth: $elm$core$Maybe$Nothing, point: point, text: str})
-				}));
-	});
-var $author$project$Main$renderGame = function (model) {
-	return _Utils_ap(
-		_List_fromArray(
-			[
-				A2(
-				$joakin$elm_canvas$Canvas$shapes,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$joakin$elm_canvas$Canvas$circle,
-						_Utils_Tuple2(model.ballX, model.ballY + model.offSet),
-						$author$project$Main$radius)
-					]))
-			]),
-		_Utils_ap(
-			$author$project$Main$renderScaffolds(model),
-			_List_fromArray(
-				[
-					A3(
-					$joakin$elm_canvas$Canvas$text,
-					_List_fromArray(
-						[
-							$joakin$elm_canvas$Canvas$Settings$Text$font(
-							{family: 'sans-serif', size: 24})
-						]),
-					_Utils_Tuple2(250, 20),
-					'Score:' + $elm$core$String$fromInt($author$project$Main$height - model.score))
-				])));
-};
-var $author$project$Main$renderName = function (model) {
-	return _List_fromArray(
-		[
-			A3(
-			$joakin$elm_canvas$Canvas$text,
-			_List_fromArray(
-				[
-					$joakin$elm_canvas$Canvas$Settings$Text$font(
-					{family: 'sans-serif', size: 48})
-				]),
-			_Utils_Tuple2(50, 50),
-			'Get Started')
-		]);
-};
-var $author$project$Main$renderRanking = function (model) {
-	return _List_fromArray(
-		[
-			A3(
-			$joakin$elm_canvas$Canvas$text,
-			_List_fromArray(
-				[
-					$joakin$elm_canvas$Canvas$Settings$Text$font(
-					{family: 'sans-serif', size: 48})
-				]),
-			_Utils_Tuple2(50, 50),
-			'Get Started')
-		]);
-};
-var $author$project$Main$renderTop = function (model) {
-	return _List_fromArray(
-		[
-			A3(
-			$joakin$elm_canvas$Canvas$text,
-			_List_fromArray(
-				[
-					$joakin$elm_canvas$Canvas$Settings$Text$font(
-					{family: 'sans-serif', size: 48})
-				]),
-			_Utils_Tuple2(50, 50),
-			'Jumping')
-		]);
-};
-var $author$project$Main$render = function (model) {
-	var _v0 = model.phase;
-	switch (_v0.$) {
-		case 'Top':
-			return $author$project$Main$renderTop(model);
-		case 'Ranking':
-			return $author$project$Main$renderRanking(model);
-		case 'Game':
-			return $author$project$Main$renderGame(model);
-		default:
-			return $author$project$Main$renderName(model);
-	}
 };
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
@@ -6270,6 +6609,19 @@ var $elm$virtual_dom$VirtualDom$keyedNode = function (tag) {
 };
 var $elm$html$Html$Keyed$node = $elm$virtual_dom$VirtualDom$keyedNode;
 var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$empty = _List_Nil;
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
 var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$fn = F2(
 	function (name, args) {
 		return $elm$json$Json$Encode$object(
@@ -6526,6 +6878,20 @@ var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$fill = function (fil
 				$joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$fillRuleToString(fillRule))
 			]));
 };
+var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$field = F2(
+	function (name, value) {
+		return $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'type',
+					$elm$json$Json$Encode$string('field')),
+					_Utils_Tuple2(
+					'name',
+					$elm$json$Json$Encode$string(name)),
+					_Utils_Tuple2('value', value)
+				]));
+	});
 var $elm$core$String$concat = function (strings) {
 	return A2($elm$core$String$join, '', strings);
 };
@@ -6809,11 +7175,6 @@ var $elm$core$Basics$composeR = F3(
 		return g(
 			f(x));
 	});
-var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
-	});
 var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $elm$json$Json$Decode$value = _Json_decodeValue;
 var $joakin$elm_canvas$Canvas$decodeTextureImageInfo = A2(
@@ -6838,13 +7199,6 @@ var $joakin$elm_canvas$Canvas$decodeTextureImageInfo = A2(
 	},
 	A2($elm$json$Json$Decode$field, 'target', $elm$json$Json$Decode$value));
 var $elm$html$Html$img = _VirtualDom_node('img');
-var $elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$string(string));
-	});
 var $elm$html$Html$Attributes$src = function (url) {
 	return A2(
 		$elm$html$Html$Attributes$stringProperty,
@@ -6917,6 +7271,180 @@ var $joakin$elm_canvas$Canvas$toHtml = F3(
 			attrs,
 			entities);
 	});
+var $author$project$Main$render = F2(
+	function (model, nextRender) {
+		return A3(
+			$joakin$elm_canvas$Canvas$toHtml,
+			_Utils_Tuple2($author$project$Main$width, $author$project$Main$height),
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$style, 'border', '5px solid rgba(0,0,0,0.1)'),
+					$elm$html$Html$Events$onClick($author$project$Main$Test),
+					A2($elm$html$Html$Events$on, 'mousedown', $author$project$Main$mouseDownDecoder),
+					A2($elm$html$Html$Events$on, 'mouseup', $author$project$Main$mouseUpDecoder)
+				]),
+			_Utils_ap(
+				_List_fromArray(
+					[$author$project$Main$clearScreen]),
+				nextRender(model)));
+	});
+var $joakin$elm_canvas$Canvas$Internal$Canvas$Circle = F2(
+	function (a, b) {
+		return {$: 'Circle', a: a, b: b};
+	});
+var $joakin$elm_canvas$Canvas$circle = F2(
+	function (pos, radius) {
+		return A2($joakin$elm_canvas$Canvas$Internal$Canvas$Circle, pos, radius);
+	});
+var $joakin$elm_canvas$Canvas$Internal$Canvas$SettingCommand = function (a) {
+	return {$: 'SettingCommand', a: a};
+};
+var $joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$font = function (f) {
+	return A2(
+		$joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$field,
+		'font',
+		$elm$json$Json$Encode$string(f));
+};
+var $joakin$elm_canvas$Canvas$Settings$Text$font = function (_v0) {
+	var size = _v0.size;
+	var family = _v0.family;
+	return $joakin$elm_canvas$Canvas$Internal$Canvas$SettingCommand(
+		$joakin$elm_canvas$Canvas$Internal$CustomElementJsonApi$font(
+			$elm$core$String$fromInt(size) + ('px ' + family)));
+};
+var $author$project$Main$renderScaffolds = function (model) {
+	var renderS = function (scaffold) {
+		var yPos = scaffold.leftTip.b;
+		var xPos = scaffold.leftTip.a;
+		var len = scaffold.length;
+		return A2(
+			$joakin$elm_canvas$Canvas$shapes,
+			_List_Nil,
+			_List_fromArray(
+				[
+					(_Utils_cmp(xPos + len, $author$project$Main$width) < 0) ? A3(
+					$joakin$elm_canvas$Canvas$rect,
+					_Utils_Tuple2(xPos, model.offSet + yPos),
+					len,
+					5) : A3(
+					$joakin$elm_canvas$Canvas$rect,
+					_Utils_Tuple2(xPos, model.offSet + yPos),
+					len,
+					5),
+					A3(
+					$joakin$elm_canvas$Canvas$rect,
+					_Utils_Tuple2(0, model.offSet + yPos),
+					(xPos + len) - $author$project$Main$width,
+					5)
+				]));
+	};
+	return A2($elm$core$List$map, renderS, model.scaffolds);
+};
+var $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableText = function (a) {
+	return {$: 'DrawableText', a: a};
+};
+var $joakin$elm_canvas$Canvas$text = F3(
+	function (settings, point, str) {
+		return A2(
+			$joakin$elm_canvas$Canvas$addSettingsToRenderable,
+			settings,
+			$joakin$elm_canvas$Canvas$Renderable(
+				{
+					commands: _List_Nil,
+					drawOp: $joakin$elm_canvas$Canvas$Internal$Canvas$NotSpecified,
+					drawable: $joakin$elm_canvas$Canvas$Internal$Canvas$DrawableText(
+						{maxWidth: $elm$core$Maybe$Nothing, point: point, text: str})
+				}));
+	});
+var $author$project$Main$renderGame = function (model) {
+	return _Utils_ap(
+		_List_fromArray(
+			[
+				A2(
+				$joakin$elm_canvas$Canvas$shapes,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$joakin$elm_canvas$Canvas$circle,
+						_Utils_Tuple2(model.ballX, model.ballY + model.offSet),
+						$author$project$Main$radius)
+					]))
+			]),
+		_Utils_ap(
+			$author$project$Main$renderScaffolds(model),
+			_Utils_ap(
+				_List_fromArray(
+					[
+						A3(
+						$joakin$elm_canvas$Canvas$text,
+						_List_fromArray(
+							[
+								$joakin$elm_canvas$Canvas$Settings$Text$font(
+								{family: 'sans-serif', size: 24})
+							]),
+						_Utils_Tuple2(250, 20),
+						'Score:' + $elm$core$String$fromInt($author$project$Main$height - model.score))
+					]),
+				model.isOver ? _List_fromArray(
+					[
+						A3(
+						$joakin$elm_canvas$Canvas$text,
+						_List_fromArray(
+							[
+								$joakin$elm_canvas$Canvas$Settings$Text$font(
+								{family: 'sans-serif', size: 48})
+							]),
+						_Utils_Tuple2($author$project$Main$width / 4, $author$project$Main$height / 2),
+						'Game over'),
+						A3(
+						$joakin$elm_canvas$Canvas$text,
+						_List_fromArray(
+							[
+								$joakin$elm_canvas$Canvas$Settings$Text$font(
+								{family: 'sans-serif', size: 24})
+							]),
+						_Utils_Tuple2(10, ($author$project$Main$height * 2) / 3),
+						'Press \"->\" key to restart')
+					]) : _List_Nil)));
+};
+var $author$project$Main$renderRanking = function (model) {
+	return _List_fromArray(
+		[
+			A3(
+			$joakin$elm_canvas$Canvas$text,
+			_List_fromArray(
+				[
+					$joakin$elm_canvas$Canvas$Settings$Text$font(
+					{family: 'sans-serif', size: 48})
+				]),
+			_Utils_Tuple2(50, 50),
+			'Get Started')
+		]);
+};
+var $author$project$Main$renderTop = function (model) {
+	return _List_fromArray(
+		[
+			A3(
+			$joakin$elm_canvas$Canvas$text,
+			_List_fromArray(
+				[
+					$joakin$elm_canvas$Canvas$Settings$Text$font(
+					{family: 'sans-serif', size: 48})
+				]),
+			_Utils_Tuple2(50, 50),
+			'JumpingBall'),
+			A3(
+			$joakin$elm_canvas$Canvas$text,
+			_List_fromArray(
+				[
+					$joakin$elm_canvas$Canvas$Settings$Text$font(
+					{family: 'sans-serif', size: 24})
+				]),
+			_Utils_Tuple2(30, ($author$project$Main$height * 2) / 3),
+			'Press \"->\" key to start')
+		]);
+};
 var $author$project$Main$view = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -6928,18 +7456,29 @@ var $author$project$Main$view = function (model) {
 			]),
 		_List_fromArray(
 			[
-				A3(
-				$joakin$elm_canvas$Canvas$toHtml,
-				_Utils_Tuple2($author$project$Main$width, $author$project$Main$height),
-				_List_fromArray(
-					[
-						A2($elm$html$Html$Attributes$style, 'border', '5px solid rgba(0,0,0,0.1)'),
-						$elm$html$Html$Events$onClick($author$project$Main$Test)
-					]),
-				_Utils_ap(
-					_List_fromArray(
-						[$author$project$Main$clearScreen]),
-					$author$project$Main$render(model)))
+				function () {
+				var _v0 = model.phase;
+				switch (_v0.$) {
+					case 'Name':
+						return A2(
+							$elm$html$Html$input,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$placeholder('ハンドルネーム'),
+									$elm$html$Html$Events$onInput($author$project$Main$NameInput),
+									$author$project$Main$onEnter($author$project$Main$NameDecided)
+								]),
+							_List_Nil);
+					case 'Top':
+						return A2($author$project$Main$render, model, $author$project$Main$renderTop);
+					case 'Game':
+						return A2($author$project$Main$render, model, $author$project$Main$renderGame);
+					case 'Ranking':
+						return A2($author$project$Main$render, model, $author$project$Main$renderRanking);
+					default:
+						return A2($author$project$Main$render, model, $author$project$Main$renderRanking);
+				}
+			}()
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
