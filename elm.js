@@ -6310,7 +6310,11 @@ var $author$project$Main$update = F2(
 							var _v17 = A2($author$project$Main$getRegion, x, y);
 							switch (_v17.$) {
 								case 'RightCorner':
-									return _Utils_Tuple2(
+									return model.isOver ? _Utils_Tuple2(
+										_Utils_update(
+											$author$project$Main$initialModel,
+											{phase: $author$project$Main$Game, userName: model.userName}),
+										$author$project$Main$generateScaffolds) : _Utils_Tuple2(
 										_Utils_update(
 											model,
 											{rightPressed: true}),
@@ -7333,8 +7337,8 @@ var $author$project$Main$render = F2(
 			_List_fromArray(
 				[
 					A2($elm$html$Html$Attributes$style, 'border', '5px solid rgba(0,0,0,0.1)'),
-					A2($elm$html$Html$Events$on, 'mousedown', $author$project$Main$mouseDownDecoder),
-					A2($elm$html$Html$Events$on, 'mouseup', $author$project$Main$mouseUpDecoder)
+					A2($elm$html$Html$Events$on, 'touchstart', $author$project$Main$mouseDownDecoder),
+					A2($elm$html$Html$Events$on, 'touchend', $author$project$Main$mouseUpDecoder)
 				]),
 			_Utils_ap(
 				_List_fromArray(
