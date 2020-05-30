@@ -6609,11 +6609,11 @@ var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
 	});
 var $author$project$Main$mouseDownDecoder = A3(
 	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-	'offsetY',
+	'pageY',
 	$elm$json$Json$Decode$float,
 	A3(
 		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-		'offsetX',
+		'pageX',
 		$elm$json$Json$Decode$float,
 		$elm$json$Json$Decode$succeed($author$project$Main$MouseDown)));
 var $author$project$Main$MouseUp = F2(
@@ -6622,11 +6622,11 @@ var $author$project$Main$MouseUp = F2(
 	});
 var $author$project$Main$mouseUpDecoder = A3(
 	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-	'offsetY',
+	'pageY',
 	$elm$json$Json$Decode$float,
 	A3(
 		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-		'offsetX',
+		'pageX',
 		$elm$json$Json$Decode$float,
 		$elm$json$Json$Decode$succeed($author$project$Main$MouseUp)));
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
