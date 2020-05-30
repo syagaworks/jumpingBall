@@ -6046,6 +6046,13 @@ var $elm$core$List$filter = F2(
 			list);
 	});
 var $elm$core$Basics$ge = _Utils_ge;
+var $author$project$Main$LeftCorner = {$: 'LeftCorner'};
+var $author$project$Main$RightCorner = {$: 'RightCorner'};
+var $author$project$Main$Upper = {$: 'Upper'};
+var $author$project$Main$getRegion = F2(
+	function (x, y) {
+		return (_Utils_cmp(y, $author$project$Main$height / 3) < 0) ? $author$project$Main$Upper : ((_Utils_cmp(x, $author$project$Main$width / 2) < 0) ? $author$project$Main$LeftCorner : $author$project$Main$RightCorner);
+	});
 var $elm$core$List$isEmpty = function (xs) {
 	if (!xs.b) {
 		return true;
@@ -6252,12 +6259,6 @@ var $author$project$Main$update = F2(
 							var _v13 = msg.a;
 							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 					}
-				case 'Test':
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{ballY: 100}),
-						$elm$core$Platform$Cmd$none);
 				case 'AppendScaffolds':
 					var scaffolds = msg.a;
 					var initialScaffold = function () {
@@ -6289,8 +6290,68 @@ var $author$project$Main$update = F2(
 									A3($elm_community$list_extra$List$Extra$scanl, foldY, initialScaffold, scaffolds))
 							}),
 						$elm$core$Platform$Cmd$none);
+				case 'MouseDown':
+					var x = msg.a;
+					var y = msg.b;
+					var _v15 = model.phase;
+					switch (_v15.$) {
+						case 'Top':
+							var _v16 = A2($author$project$Main$getRegion, x, y);
+							if (_v16.$ === 'RightCorner') {
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{phase: $author$project$Main$Game}),
+									$elm$core$Platform$Cmd$none);
+							} else {
+								return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+							}
+						case 'Game':
+							var _v17 = A2($author$project$Main$getRegion, x, y);
+							switch (_v17.$) {
+								case 'RightCorner':
+									return _Utils_Tuple2(
+										_Utils_update(
+											model,
+											{rightPressed: true}),
+										$elm$core$Platform$Cmd$none);
+								case 'LeftCorner':
+									return _Utils_Tuple2(
+										_Utils_update(
+											model,
+											{leftPressed: true}),
+										$elm$core$Platform$Cmd$none);
+								default:
+									return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+							}
+						default:
+							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					}
 				default:
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					var x = msg.a;
+					var y = msg.b;
+					var _v18 = model.phase;
+					if (_v18.$ === 'Game') {
+						var _v19 = A2($author$project$Main$getRegion, x, y);
+						switch (_v19.$) {
+							case 'RightCorner':
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{rightPressed: false}),
+									$elm$core$Platform$Cmd$none);
+							case 'LeftCorner':
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{leftPressed: false}),
+									$elm$core$Platform$Cmd$none);
+							default:
+								return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+						}
+					} else {
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					}
 			}
 		}
 	});
@@ -6364,7 +6425,6 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
-var $author$project$Main$Test = {$: 'Test'};
 var $joakin$elm_canvas$Canvas$Internal$Canvas$Fill = function (a) {
 	return {$: 'Fill', a: a};
 };
@@ -6534,6 +6594,7 @@ var $author$project$Main$MouseDown = F2(
 	function (a, b) {
 		return {$: 'MouseDown', a: a, b: b};
 	});
+var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom = $elm$json$Json$Decode$map2($elm$core$Basics$apR);
 var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
 	function (key, valDecoder, decoder) {
@@ -6545,11 +6606,11 @@ var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
 var $author$project$Main$mouseDownDecoder = A3(
 	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 	'offsetY',
-	$elm$json$Json$Decode$int,
+	$elm$json$Json$Decode$float,
 	A3(
 		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 		'offsetX',
-		$elm$json$Json$Decode$int,
+		$elm$json$Json$Decode$float,
 		$elm$json$Json$Decode$succeed($author$project$Main$MouseDown)));
 var $author$project$Main$MouseUp = F2(
 	function (a, b) {
@@ -6558,18 +6619,12 @@ var $author$project$Main$MouseUp = F2(
 var $author$project$Main$mouseUpDecoder = A3(
 	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 	'offsetY',
-	$elm$json$Json$Decode$int,
+	$elm$json$Json$Decode$float,
 	A3(
 		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 		'offsetX',
-		$elm$json$Json$Decode$int,
+		$elm$json$Json$Decode$float,
 		$elm$json$Json$Decode$succeed($author$project$Main$MouseUp)));
-var $elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
-};
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$html$Html$canvas = _VirtualDom_node('canvas');
@@ -7175,7 +7230,6 @@ var $elm$core$Basics$composeR = F3(
 		return g(
 			f(x));
 	});
-var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $elm$json$Json$Decode$value = _Json_decodeValue;
 var $joakin$elm_canvas$Canvas$decodeTextureImageInfo = A2(
 	$elm$json$Json$Decode$andThen,
@@ -7279,7 +7333,6 @@ var $author$project$Main$render = F2(
 			_List_fromArray(
 				[
 					A2($elm$html$Html$Attributes$style, 'border', '5px solid rgba(0,0,0,0.1)'),
-					$elm$html$Html$Events$onClick($author$project$Main$Test),
 					A2($elm$html$Html$Events$on, 'mousedown', $author$project$Main$mouseDownDecoder),
 					A2($elm$html$Html$Events$on, 'mouseup', $author$project$Main$mouseUpDecoder)
 				]),
